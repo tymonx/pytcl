@@ -3,7 +3,7 @@
 
 # PyTCL
 
-**PyTCL** allows control EDA tools directly from **Python** that use **TCL**.
+**PyTCL** allows control **EDA** tools directly from **Python** that use **TCL**.
 
 ## Install
 

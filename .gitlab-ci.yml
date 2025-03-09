@@ -15,7 +15,7 @@ reuse:
         - reuse lint
 
 .ruff:
-    image: ghcr.io/astral-sh/ruff:latest
+    image: ghcr.io/astral-sh/ruff:debian-slim
     variables:
         FORCE_COLOR: 1
     rules:
