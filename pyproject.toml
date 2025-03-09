@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: 2025 Tymoteusz Blazejczyk <tymoteusz.blazejczyk@tymonx.com>
+# SPDX-License-Identifier: Apache-2.0
+
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#writing-your-pyproject-toml
+
+[project]
+name = "pytcl"
+readme = "README.md"
+dynamic = ["version"]
+license = { text = "Apache-2.0" }
+description = "PyTCL allows control EDA tools directly from Python that use TCL"
+requires-python = ">=3.9"
+authors = [{ name = "Tymoteusz Blazejczyk", email = "tymoteusz.blazejczyk@tymonx.com" }]
+
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#keywords
+keywords = [
+    "python",
+    "tcl",
+    "hdl",
+    "rtl",
+    "eda",
+    "flow",
+    "script",
+    "scripting",
+    "vhdl",
+    "verilog",
+    "systemverilog",
+    "fpga",
+    "asic",
+    "xilinx",
+    "vivado",
+    "altera",
+    "quartus",
+    "cadence",
+    "xcelium",
+    "siemens",
+    "modelsim",
+    "questa",
+    "synopsys",
+    "vcs",
+]
+
+# https://pypi.org/classifiers/
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#classifiers
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Utilities",
+
+    "Programming Language :: Tcl",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
+# https://packaging.python.org/en/latest/specifications/well-known-project-urls/#well-known-labels
+[project.urls]
+Homepage = "https://gitlab.com/tymonx/pytcl"
+Source = "https://gitlab.com/tymonx/pytcl.git"
+Issues = "https://gitlab.com/tymonx/pytcl/-/issues"
+Documentation = "https://gitlab.com/tymonx/pytcl/-/blob/HEAD/README.md"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov"]
+lint = ["ruff", "pyright"]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
