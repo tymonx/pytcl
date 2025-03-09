@@ -4,7 +4,7 @@
 # https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#writing-your-pyproject-toml
 
 [project]
-name = "pytcl"
+name = "pytcl-eda"
 readme = "README.md"
 dynamic = ["version"]
 license = { text = "Apache-2.0" }
@@ -80,6 +80,9 @@ lint = ["ruff", "pyright"]
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pytcl"]
 
 [tool.hatch.version]
 source = "vcs"
