@@ -1,11 +1,15 @@
----
-SPDX-FileCopyrightText: 2025 Tymoteusz Blazejczyk <tymoteusz.blazejczyk@tymonx.com>
-SPDX-License-Identifier: Apache-2.0
----
+<!-- SPDX-FileCopyrightText: 2025 Tymoteusz Blazejczyk <tymoteusz.blazejczyk@tymonx.com> -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 
 # PyTCL
 
 **PyTCL** allows control EDA tools directly from **Python** that use **TCL**.
+
+## Install
+
+```python
+pip install pytcl-eda
+```
 
 ## Examples
 
