@@ -2,12 +2,46 @@
 # SPDX-FileCopyrightText: 2025 Tymoteusz Blazejczyk <tymoteusz.blazejczyk@tymonx.com>
 # SPDX-License-Identifier: Apache-2.0
 
-reuse:
+.python:
     image: python:latest
+    needs: []
     rules:
         - if: $CI_COMMIT_REF_NAME
           when: always
         - when: never
+
+pytest:
+    extends: .python
+    artifacts:
+        paths:
+            - '**/*.log'
+            - '**/*.xml'
+        reports:
+            junit: junit.xml
+            coverage_report:
+                coverage_format: cobertura
+                path: cobertura.xml
+    coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+    before_script:
+        - pip install --upgrade pip
+        - pip install --editable .[test]
+    script:
+        - >-
+          pytest
+          --capture=no
+          --verbose
+          --color=yes
+          --code-highlight=yes
+          --cov
+          --cov-report=term
+          --cov-report=xml:"${CI_PROJECT_DIR}/cobertura.xml"
+          --log-cli-level=INFO
+          --log-file="${CI_PROJECT_DIR}/pytest.log"
+          --log-file-level=DEBUG
+          --junit-xml="${CI_PROJECT_DIR}/junit.xml"
+
+reuse:
+    extends: .python
     before_script:
         - pip install --upgrade pip
         - pip install reuse
@@ -16,6 +50,7 @@ reuse:
 
 .ruff:
     image: ghcr.io/astral-sh/ruff:debian-slim
+    needs: []
     variables:
         FORCE_COLOR: 1
     rules:
@@ -38,7 +73,7 @@ ruff-format:
         - ruff format --diff
 
 deploy-pypi-public:
-    image: python:latest
+    extends: .python
     variables:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: $PYPI_API_TOKEN
@@ -54,7 +89,7 @@ deploy-pypi-public:
         - python -m twine upload dist/*
 
 deploy-pypi-gitlab:
-    image: python:latest
+    extends: .python
     variables:
         TWINE_USERNAME: gitlab-ci-token
         TWINE_PASSWORD: $CI_JOB_TOKEN
