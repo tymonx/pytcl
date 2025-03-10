@@ -40,21 +40,24 @@ fconfigure ${tx_channel} -blocking false -buffering line
 proc execute {rx_channel tx_channel} {
     global TO_JSON_STRING
 
-    # Get TCL expression from receiver.py
-    set status [catch {gets ${rx_channel} line} length]
+    while {1} {
+        # Get TCL expression from receiver.py
+        set status [catch {gets ${rx_channel} line} length]
 
-    # Evaluate received TCL expression and send result back to PyTCL using sender.py
-    if {(${status} == 0) && (${length} >= 0)} {
-        set status [catch {eval "${line}"} result]
-        set result [string map ${TO_JSON_STRING} "${result}"]
-        puts ${tx_channel} "{\"result\":\"${result}\",\"status\":${status}}"
-    }
+        # Evaluate received TCL expression and send result back to PyTCL using sender.py
+        if {(${status} == 0) && (${length} >= 0)} {
+            set status [catch {eval "${line}"} result]
+            set result [string map ${TO_JSON_STRING} "${result}"]
+            puts ${tx_channel} "{\"result\":\"${result}\",\"status\":${status}}"
+        }
 
-    # Close all opened channels and exit this TCL script
-    if {[eof ${rx_channel}]} {
-        close ${rx_channel}
-        close ${tx_channel}
-        set ::forever 0
+        # Close all opened channels and exit this TCL script
+        if {[eof ${rx_channel}]} {
+            close ${rx_channel}
+            close ${tx_channel}
+            set ::forever 0
+            break
+        }
     }
 }
 

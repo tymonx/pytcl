@@ -31,8 +31,16 @@ class TCLValue:
     def __iter__(self) -> Iterator["TCLValue"]:
         return iter(TCLValue(value) for value in self._value.split())
 
-    def __getitem__(self, key: str) -> "TCLValue":
-        return dict(self.items())[key]
+    def __len__(self) -> int:
+        """Number of elements in TCL list."""
+        return len(list(self.__iter__()))
+
+    def __getitem__(self, key: str | int) -> "TCLValue":
+        """Get single TCL value from TCL list or dictionary using provided index or dictionary key."""
+        if isinstance(key, int):
+            return list(self.__iter__())[key]
+
+        return dict(self.items())[str(key)]
 
     def items(self) -> Iterable[Tuple[str, "TCLValue"]]:
         items: list[str] = self._value.split()

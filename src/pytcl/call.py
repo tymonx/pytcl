@@ -73,8 +73,12 @@ class TCLCall:
         """Iterator over TCL list. Used to convert TCL value to Python list or sequence type."""
         return self.__call__().__iter__()
 
-    def __getitem__(self, key: str) -> TCLValue:
-        """Get single TCL value from TCL dictionary using provided dictionary key."""
+    def __len__(self) -> int:
+        """Number of elements in TCL list."""
+        return self.__call__().__len__()
+
+    def __getitem__(self, key: str | int) -> TCLValue:
+        """Get single TCL value from TCL list or dictionary using provided index or dictionary key."""
         return self.__call__().__getitem__(key)
 
     def items(self) -> Iterable[Tuple[str, TCLValue]]:
