@@ -48,11 +48,11 @@ if __name__ == "__main__":
 ## Architecture
 
 ```mermaid
-stateDiagram
+stateDiagram-v2
     direction LR
     PyTCL --> rx.sock: string
     rx.sock --> receive.py: string
-    state tool {
+    state EDA tool {
         receive.py --> execute.tcl: stdin
         execute.tcl --> sender.py: stdout
     }
