@@ -4,7 +4,7 @@
 """EDA tool: Xilinx Vivado."""
 
 from pathlib import Path
-from .pytcl import PyTCL, EXECUTE_TCL
+from .pytcl import PyTCL
 
 
 class Vivado(PyTCL):
@@ -44,6 +44,9 @@ class Vivado(PyTCL):
             cmd.extend(("-mode", mode))
 
         cmd.extend(args)
-        cmd.extend(("-source", EXECUTE_TCL, "-tclargs"))
+
+        # PyTCL offers some placeholders like `{tcl}` to insert `<pytcl>/execute.tcl`
+        # Remaining missing arguments by PyTCL are always appended at the end: `{receiver} {rx} {sender} {tx}`
+        cmd.extend(("-source", "{tcl}", "-tclargs"))
 
         super().__init__(*cmd, **kwargs)

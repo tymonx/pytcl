@@ -31,6 +31,13 @@ class PyTCL:
         rx: Path = self._dir / "rx.sock"
         tx: Path = self._dir / "tx.sock"
 
+        # PyTCL offers some string placeholders {}:
+        # {tcl}      -> insert <pytcl>/execute.tcl
+        # {receiver} -> insert <pytcl>/receiver.tcl
+        # {rx}       -> insert /tmp/pytcl-XXXXX/rx.sock
+        # {sender}   -> insert <pytcl>/sender.tcl
+        # {tx}       -> insert /tmp/pytcl-XXXXX/tx.sock
+        # {args}     -> insert {receier} {rx} {sender} {tx} in one go
         cmd: list[str] = [
             str(arg).format(
                 tcl=EXECUTE_TCL,
@@ -38,6 +45,7 @@ class PyTCL:
                 rx=rx,
                 sender=SENDER_PY,
                 tx=tx,
+                args=" ".join((str(RECEIVER_PY), str(rx), str(SENDER_PY), str(tx))),
             )
             for arg in args
         ]
@@ -46,7 +54,7 @@ class PyTCL:
             cmd = ["tclsh"]
 
         for item in (EXECUTE_TCL, RECEIVER_PY, rx, SENDER_PY, tx):
-            if str(item) not in cmd:
+            if not self._in_cmd(item, cmd):
                 cmd.append(str(item))
 
         self._listener: Listener = Listener(str(tx))
@@ -86,3 +94,12 @@ class PyTCL:
             Callable TCL object.
         """
         return TCLCall(name, self._rx, self._tx)
+
+    @staticmethod
+    def _in_cmd(item: str | Path, cmd: list[str]) -> bool:
+        """Check if provided item is already part of command list."""
+        for argument in cmd:
+            if str(item).strip() in argument:
+                return True
+
+        return False
