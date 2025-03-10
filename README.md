@@ -51,9 +51,9 @@ if __name__ == "__main__":
 stateDiagram-v2
     direction LR
     PyTCL --> rx.sock: string
-    rx.sock --> receive.py: string
+    rx.sock --> receiver.py: string
     state EDA tool {
-        receive.py --> execute.tcl: stdin
+        receiver.py --> execute.tcl: stdin
         execute.tcl --> sender.py: stdout
     }
     sender.py --> tx.sock: NDJSON
