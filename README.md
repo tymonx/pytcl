@@ -47,6 +47,19 @@ if __name__ == "__main__":
 
 ## Architecture
 
+```mermaid
+stateDiagram
+    direction LR
+    PyTCL --> rx.sock: string
+    rx.sock --> receive.py: string
+    state tool {
+        receive.py --> execute.tcl: stdin
+        execute.tcl --> sender.py: stdout
+    }
+    sender.py --> tx.sock: NDJSON
+    tx.sock --> PyTCL: NDJSON
+```
+
 - `PyTCL` will start new receiver listened on Unix domain socket `/tmp/pytcl-XXXX/tx.sock` for any
   incoming [NDJSON] messages `{"result": "<tcl-result>", "status": <tcl-status>}` from `execute.tcl` script file
 - `PyTCL` will call command line tool (by default `tclsh`) with `execute.tcl` script file and
