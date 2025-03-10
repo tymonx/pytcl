@@ -15,6 +15,8 @@
 - TCL error is returned as Python exception `pytcl.TCLError`
 - High performance and very low (unnoticeable) overhead by using Unix domain sockets for communication
   between Python and TCL in streamable way (sockets are always open and ready)
+- Creating TCL variables from Python side. Please see `tests/test_tclsh.py` for some examples
+- It can work with any EDA tool. Please see `tests/test_vivado.py` how to use bare `PyTCL` class for that
 - No external dependencies
 
 ## Install
