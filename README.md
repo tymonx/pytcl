@@ -15,8 +15,8 @@
 - TCL error is returned as Python exception `pytcl.TCLError`
 - High performance and very low (unnoticeable) overhead by using Unix domain sockets for communication
   between Python and TCL in streamable way (sockets are always open and ready)
-- Creating TCL variables from Python side. Please see `tests/test_tclsh.py` for some examples
-- It can work with any EDA tool. Please see `tests/test_vivado.py` how to use bare `PyTCL` class for that
+- It allows to create and access TCL variables from Python side. Please see [tests/test_tclsh.py] for some examples
+- It can work with any EDA tool. Please see [tests/test_vivado.py] how to use bare `PyTCL` class for that
 - No external dependencies
 
 ## Install
@@ -50,14 +50,14 @@ if __name__ == "__main__":
 ```mermaid
 stateDiagram-v2
     direction LR
-    PyTCL --> rx.sock: string
+    PyTCL --> rx.sock: send()
     rx.sock --> receiver.py: string
-    state EDA tool {
+    state tool {
         receiver.py --> execute.tcl: stdin
         execute.tcl --> sender.py: stdout
     }
     sender.py --> tx.sock: NDJSON
-    tx.sock --> PyTCL: NDJSON
+    tx.sock --> PyTCL: recv()
 ```
 
 - `PyTCL` will start new receiver listened on Unix domain socket `/tmp/pytcl-XXXX/tx.sock` for any
@@ -115,3 +115,5 @@ pytest
 [editable mode]: https://setuptools.pypa.io/en/latest/userguide/development_mode.html
 [pytest]: https://docs.pytest.org/en/stable/
 [pip]: https://pip.pypa.io/en/stable/
+[tests/test_tclsh.py]: https://gitlab.com/tymonx/pytcl/-/blob/main/tests/test_tclsh.py
+[tests/test_vivado.py]: https://gitlab.com/tymonx/pytcl/-/blob/main/tests/test_vivado.py
