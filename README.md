@@ -43,12 +43,9 @@ def main() -> None:
         # See Vivado Design Suite Tcl Command Reference Guide (UG835) for all available Vivado TCL procedures
         # https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands
         vivado.create_project(project_dir.name, project_dir)
-
         vivado.add_files(hdl_dir / "my_awesome_design.sv")
 
         synthesis_runs = list(vivado.get_runs("synth_*"))
-        implementation_runs = list(vivado.get_runs("impl_*"))
-
         vivado.launch_runs(synthesis_runs)
 
         # wait_on_runs was introduced in Vivado 2021.2. For backward compatibility we will use wait_on_run
@@ -57,6 +54,7 @@ def main() -> None:
         for run in synthesis_runs:
             vivado.wait_on_run(run)
 
+        implementation_runs = list(vivado.get_runs("impl_*"))
         vivado.launch_runs(implementation_runs)
 
         for run in implementation_runs:

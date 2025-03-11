@@ -9,6 +9,19 @@
         - if: $CI_COMMIT_REF_NAME
           when: always
         - when: never
+    before_script:
+        - pip install --upgrade pip
+        - pip install ${PIP_INSTALL:-}
+
+.ruff:
+    image: ghcr.io/astral-sh/ruff:debian-slim
+    needs: []
+    variables:
+        FORCE_COLOR: 1
+    rules:
+        - if: $CI_COMMIT_REF_NAME
+          when: always
+        - when: never
 
 pytest:
     extends: .python
@@ -22,9 +35,8 @@ pytest:
                 coverage_format: cobertura
                 path: cobertura.xml
     coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-    before_script:
-        - pip install --upgrade pip
-        - pip install --editable .[test]
+    variables:
+        PIP_INSTALL: --editable .[test]
     script:
         - >-
           pytest
@@ -42,21 +54,10 @@ pytest:
 
 reuse:
     extends: .python
-    before_script:
-        - pip install --upgrade pip
-        - pip install reuse
+    variables:
+        PIP_INSTALL: reuse
     script:
         - reuse lint
-
-.ruff:
-    image: ghcr.io/astral-sh/ruff:debian-slim
-    needs: []
-    variables:
-        FORCE_COLOR: 1
-    rules:
-        - if: $CI_COMMIT_REF_NAME
-          when: always
-        - when: never
 
 ruff-check:
     extends: .ruff
@@ -77,13 +78,11 @@ deploy-pypi-public:
     variables:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: $PYPI_API_TOKEN
+        PIP_INSTALL: build twine
     rules:
         - if: $CI_COMMIT_TAG
           when: always
         - when: never
-    before_script:
-        - pip install --upgrade pip
-        - pip install build twine
     script:
         - python -m build
         - python -m twine upload dist/*
@@ -93,13 +92,11 @@ deploy-pypi-gitlab:
     variables:
         TWINE_USERNAME: gitlab-ci-token
         TWINE_PASSWORD: $CI_JOB_TOKEN
+        PIP_INSTALL: build twine
     rules:
         - if: $CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
           when: always
         - when: never
-    before_script:
-        - pip install --upgrade pip
-        - pip install build twine
     script:
         - python -m build
         - python -m twine upload --repository-url "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi" dist/*
