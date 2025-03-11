@@ -40,6 +40,8 @@ def main() -> None:
     project_dir: Path = Path.cwd() / "my-awesome-project"
 
     with Vivado() as vivado:
+        # See Vivado Design Suite Tcl Command Reference Guide (UG835) for all available Vivado TCL procedures
+        # https://docs.amd.com/r/en-US/ug835-vivado-tcl-commands
         vivado.create_project(project_dir.name, project_dir)
 
         vivado.add_files(hdl_dir / "my_awesome_design.sv")
@@ -78,6 +80,13 @@ def main() -> None:
     """Create new Vivado project."""
     project_dir: Path = Path.cwd() / "my-awesome-project"
 
+    # PyTCL offers some string placeholders {} that you can use:
+    # {tcl}      -> it will insert <pytcl>/execute.tcl
+    # {receiver} -> it will insert <pytcl>/receiver.tcl
+    # {rx}       -> it will insert /tmp/pytcl-XXXXX/rx.sock
+    # {sender}   -> it will insert <pytcl>/sender.tcl
+    # {tx}       -> it will insert /tmp/pytcl-XXXXX/tx.sock
+    # {args}     -> it will insert '{receier} {rx} {sender} {tx}' in one go
     cmd: list[str] = [
         "vivado",
         "-nojournal",
