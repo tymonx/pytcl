@@ -59,6 +59,13 @@ reuse:
     script:
         - reuse lint
 
+pyright:
+    extends: .python
+    variables:
+        PIP_INSTALL: pyright
+    script:
+        - pyright
+
 ruff-check:
     extends: .ruff
     script:
