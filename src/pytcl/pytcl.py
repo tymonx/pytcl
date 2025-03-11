@@ -31,13 +31,13 @@ class PyTCL:
         rx: Path = self._dir / "rx.sock"
         tx: Path = self._dir / "tx.sock"
 
-        # PyTCL offers some string placeholders {}:
-        # {tcl}      -> insert <pytcl>/execute.tcl
-        # {receiver} -> insert <pytcl>/receiver.tcl
-        # {rx}       -> insert /tmp/pytcl-XXXXX/rx.sock
-        # {sender}   -> insert <pytcl>/sender.tcl
-        # {tx}       -> insert /tmp/pytcl-XXXXX/tx.sock
-        # {args}     -> insert {receier} {rx} {sender} {tx} in one go
+        # PyTCL offers some string placeholders {} that you can use:
+        # {tcl}      -> it will insert <pytcl>/execute.tcl
+        # {receiver} -> it will insert <pytcl>/receiver.tcl
+        # {rx}       -> it will insert /tmp/pytcl-XXXXX/rx.sock
+        # {sender}   -> it will insert <pytcl>/sender.tcl
+        # {tx}       -> it will insert /tmp/pytcl-XXXXX/tx.sock
+        # {args}     -> it will insert '{receier} {rx} {sender} {tx}' in one go
         cmd: list[str] = [
             str(arg).format(
                 tcl=EXECUTE_TCL,
