@@ -28,7 +28,6 @@ pytest:
     artifacts:
         paths:
             - '**/*.log'
-            - '**/*.xml'
         reports:
             junit: junit.xml
             coverage_report:
@@ -62,7 +61,7 @@ reuse:
 pyright:
     extends: .python
     variables:
-        PIP_INSTALL: pyright
+        PIP_INSTALL: --editable . pyright pytest
     script:
         - pyright
 
