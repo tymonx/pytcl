@@ -30,15 +30,75 @@ pip install pytcl-eda
 Creating new Vivado project:
 
 ```python
+#!/usr/bin/env python3
 from pathlib import Path
 from pytcl import Vivado
 
 def main() -> None:
     """Create new Vivado project."""
+    hdl_dir: Path = Path.cwd() / "hdl"
     project_dir: Path = Path.cwd() / "my-awesome-project"
 
     with Vivado() as vivado:
         vivado.create_project(project_dir.name, project_dir)
+
+        vivado.add_files(hdl_dir / "my_awesome_design.sv")
+
+        synthesis_runs = list(vivado.get_runs("synth_*"))
+        implementation_runs = list(vivado.get_runs("impl_*"))
+
+        vivado.launch_runs(synthesis_runs)
+
+        # wait_on_runs was introduced in Vivado 2021.2. For backward compatibility we will use wait_on_run
+        # https://docs.amd.com/r/2021.2-English/ug835-vivado-tcl-commands/wait_on_runs
+        # Vivado >= 2021.2 can just use: vivado.wait_on_runs(synthesis_runs)
+        for run in synthesis_runs:
+            vivado.wait_on_run(run)
+
+        vivado.launch_runs(implementation_runs)
+
+        for run in implementation_runs:
+            vivado.wait_on_run(run)
+
+        vivado.close_project()
+
+if __name__ == "__main__":
+    main()
+```
+
+To use any EDA tool where `PyTCL` doesn't provide neat helper classes like `pytcl.Vivado`
+you can use the `pytcl.PyTCL` class directly:
+
+```python
+#!/usr/bin/env python3
+from pathlib import Path
+from pytcl import PyTCL
+
+def main() -> None:
+    """Create new Vivado project."""
+    project_dir: Path = Path.cwd() / "my-awesome-project"
+
+    cmd: list[str] = [
+        "vivado",
+        "-nojournal",
+        "-notrace",
+        "-nolog",
+        "-mode",
+        "batch",
+        "-source",
+        "{tcl}",
+        "-tclargs",
+        "{receiver}",
+        "{rx}",
+        "{sender}",
+        "{tx}",
+    ]
+
+    with PyTCL(*cmd) as vivado:
+        vivado.create_project(project_dir.name, project_dir)
+
+        # Do the same magic that you would normally do in TCL
+
         vivado.close_project()
 
 if __name__ == "__main__":
