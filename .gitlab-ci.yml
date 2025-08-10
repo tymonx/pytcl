@@ -53,7 +53,7 @@ pytest:
           --junit-xml=junit.xml
 
 pytest-windows:
-    extends: .pytest
+    extends: pytest
     image: registry.gitlab.com/tymonx/pywine:latest
 
 reuse:
