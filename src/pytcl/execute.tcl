@@ -26,12 +26,12 @@ set forever 1
 
 # Receiver channel from PyTCL to this TCL script:
 # PyTCL.send() -> rx.sock -> receiver.py | execute.tcl
-set rx_channel [open |[concat python3 [lindex ${argv} 0] [lindex ${argv} 1]] r]
+set rx_channel [open |[list python3 [lindex ${argv} 0] [lindex ${argv} 1]] r]
 fconfigure ${rx_channel} -blocking false -buffering line
 
 # Sender channel from this TCL script back to PyTCL:
 # execute.tcl | sender.py -> tx.sock -> PyTCL.recv()
-set tx_channel [open |[concat python3 [lindex ${argv} 2] [lindex ${argv} 3]] w+]
+set tx_channel [open |[list python3 [lindex ${argv} 2] [lindex ${argv} 3]] w+]
 fconfigure ${tx_channel} -blocking false -buffering line
 
 # Directly executing TCL expression as-is received from PyTCL

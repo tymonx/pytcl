@@ -3,6 +3,8 @@
 
 """PyTCL allows control EDA tools directly from Python that use TCL."""
 
+import sys
+from uuid import uuid4
 from time import sleep
 from typing import Self
 from pathlib import Path
@@ -16,6 +18,7 @@ DIR: Path = Path(__file__).parent.resolve()
 EXECUTE_TCL: Path = DIR / "execute.tcl"
 RECEIVER_PY: Path = DIR / "receiver.py"
 SENDER_PY: Path = DIR / "sender.py"
+WINDOWS: str = "win32"
 
 
 class PyTCL:
@@ -27,9 +30,18 @@ class PyTCL:
             timeout: Timeout in seconds when waiting for started tool to connect.
             kwargs:  Additional named arguments directly passed to `subprocess.Popen`.
         """
-        self._dir: Path = Path(mkdtemp(prefix="pytcl-")).resolve()
-        rx: Path = self._dir / "rx.sock"
-        tx: Path = self._dir / "tx.sock"
+        self._dir: Path | None = None
+        rx: str = ""
+        tx: str = ""
+
+        if sys.platform == WINDOWS:
+            uuid: str = uuid4().hex
+            rx = f"\\\\.\\pipe\\pytcl-{uuid}-rx"
+            tx = f"\\\\.\\pipe\\pytcl-{uuid}-tx"
+        else:
+            self._dir = Path(mkdtemp(prefix="pytcl-")).resolve()
+            rx = str(self._dir / "rx.sock")
+            tx = str(self._dir / "tx.sock")
 
         # PyTCL offers some string placeholders {} that you can use:
         # {tcl}      -> it will insert <pytcl>/execute.tcl
@@ -45,7 +57,7 @@ class PyTCL:
                 rx=rx,
                 sender=SENDER_PY,
                 tx=tx,
-                args=" ".join((str(RECEIVER_PY), str(rx), str(SENDER_PY), str(tx))),
+                args=" ".join((str(RECEIVER_PY), rx, str(SENDER_PY), tx)),
             )
             for arg in args
         ]
@@ -60,12 +72,18 @@ class PyTCL:
         self._listener: Listener = Listener(str(tx))
         self._process: Popen = Popen(cmd, **kwargs)
         self._tx: Connection = self._listener.accept()
+        self._rx: Connection
 
-        while not rx.exists() and timeout > 0:
-            sleep(0.1)
-            timeout -= 0.1
-
-        self._rx: Connection = Client(str(rx))
+        while True:
+            try:
+                self._rx = Client(rx)
+                break
+            except FileNotFoundError as e:
+                if timeout > 0:
+                    sleep(0.1)
+                    timeout -= 0.1
+                else:
+                    raise e
 
     def __enter__(self) -> Self:
         return self
@@ -79,7 +97,9 @@ class PyTCL:
 
         self._listener.close()
         self._process.wait()
-        self._dir.rmdir()
+
+        if self._dir:
+            self._dir.rmdir()
 
         if self._process.returncode:
             raise CalledProcessError(self._process.returncode, self._process.args)
