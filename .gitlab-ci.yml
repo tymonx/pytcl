@@ -46,11 +46,15 @@ pytest:
           --code-highlight=yes
           --cov
           --cov-report=term
-          --cov-report=xml:"${CI_PROJECT_DIR}/cobertura.xml"
+          --cov-report=xml:cobertura.xml
           --log-cli-level=INFO
-          --log-file="${CI_PROJECT_DIR}/pytest.log"
+          --log-file=pytest.log
           --log-file-level=DEBUG
-          --junit-xml="${CI_PROJECT_DIR}/junit.xml"
+          --junit-xml=junit.xml
+
+pytest-windows:
+    extends: .pytest
+    image: registry.gitlab.com/tymonx/pywine:latest
 
 reuse:
     extends: .python
