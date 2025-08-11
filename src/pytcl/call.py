@@ -19,17 +19,15 @@ WHITESPACE = re.compile(r"\s")
 class TCLCall:
     """Call TCL expression from Python."""
 
-    def __init__(self, name: str, rx: Connection, tx: Connection):
+    def __init__(self, name: str, connection: Connection):
         """Create new instances of TCL call.
 
         Args:
-            name: Name of TCL procedure.
-            rx:   Connection from Python to TCL.
-            tx:   Connection from TCL to Python.
+            name:       Name of TCL procedure.
+            connection: Connection between Python and TCL.
         """
         self._name: str = name
-        self._rx: Connection = rx
-        self._tx: Connection = tx
+        self._connection: Connection = connection
 
     def __call__(self, *args: Any, check: bool = True, **kwargs) -> TCLValue:
         """Call TCL procedure.
@@ -42,9 +40,9 @@ class TCLCall:
             TCL value: string, list, dict, boolean, integer, floating point.
         """
         cmd: list[str] = [self._name] + [self._cast(arg) for arg in args]
-        self._rx.send(" ".join(cmd))
+        self._connection.send(" ".join(cmd))
 
-        data: dict[str, Any] = json.loads(self._tx.recv())
+        data: dict[str, Any] = json.loads(self._connection.recv())
         result: str = data.get("result", "")
         status: int = data.get("status", 0)
 

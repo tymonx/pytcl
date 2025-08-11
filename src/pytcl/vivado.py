@@ -3,7 +3,7 @@
 
 """EDA tool: Xilinx Vivado."""
 
-from pathlib import Path
+from os import PathLike
 from .pytcl import PyTCL
 
 
@@ -12,7 +12,7 @@ class Vivado(PyTCL):
 
     def __init__(
         self,
-        *args: str | Path,
+        *args: str | PathLike,
         mode: str = "batch",
         nojournal: bool = True,
         notrace: bool = True,
@@ -29,7 +29,7 @@ class Vivado(PyTCL):
             nolog:     Do not create a log file.
             kwargs:    Additional named arguments directly passed to `subprocess.Popen`.
         """
-        cmd: list[str | Path] = ["vivado"]
+        cmd: list[str | PathLike] = ["vivado"]
 
         if nojournal:
             cmd.append("-nojournal")
@@ -46,7 +46,7 @@ class Vivado(PyTCL):
         cmd.extend(args)
 
         # PyTCL offers some placeholders like `{tcl}` to insert `<pytcl>/execute.tcl`
-        # Remaining missing arguments by PyTCL are always appended at the end: `{receiver} {rx} {sender} {tx}`
+        # Remaining missing arguments by PyTCL are always appended at the end: `{address}`
         cmd.extend(("-source", "{tcl}", "-tclargs"))
 
         super().__init__(*cmd, **kwargs)

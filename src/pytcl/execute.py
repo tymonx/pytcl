@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 Tymoteusz Blazejczyk <tymoteusz.blazejczyk@tymonx.com>
 # SPDX-License-Identifier: Apache-2.0
 
-"""Receive data from Unix file socket and print it to standard output (stdout)."""
+"""Execute commands remotely via Unix socket, Windows named pipe or network address."""
 
 import sys
 from multiprocessing.connection import Listener
@@ -14,6 +14,7 @@ def main():
             while True:
                 try:
                     print(connection.recv(), flush=True)
+                    connection.send(sys.stdin.readline().strip())
                 except EOFError:
                     return
 

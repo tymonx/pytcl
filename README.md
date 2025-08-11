@@ -13,10 +13,11 @@
 - Result from invoked TCL procedure is returned as `pytcl.TCLValue` that can handle any TCL value
   (that is represented always as string) to Python `str`, `int`, `bool`, `float`, `list`, `dict`, ...
 - TCL error is returned as Python exception `pytcl.TCLError`
-- High performance and very low (unnoticeable) overhead by using Unix domain sockets for communication
-  between Python and TCL in streamable way (sockets are always open and ready)
+- High performance and very low (unnoticeable) overhead by using Unix domain sockets or Windows named pipes
+  for communication between Python and TCL in streamable way (sockets/pipes are always open and ready)
 - It allows to create and access TCL variables from Python side. Please see [tests/test_tclsh.py] for some examples
 - It can work with any EDA tool. Please see [tests/test_vivado.py] how to use bare `PyTCL` class for that
+- It supports Linux, macOS and Windows
 - No external dependencies
 
 ## Install
@@ -80,11 +81,7 @@ def main() -> None:
 
     # PyTCL offers some string placeholders {} that you can use:
     # {tcl}      -> it will insert <pytcl>/execute.tcl
-    # {receiver} -> it will insert <pytcl>/receiver.tcl
-    # {rx}       -> it will insert /tmp/pytcl-XXXXX/rx.sock
-    # {sender}   -> it will insert <pytcl>/sender.tcl
-    # {tx}       -> it will insert /tmp/pytcl-XXXXX/tx.sock
-    # {args}     -> it will insert '{receier} {rx} {sender} {tx}' in one go
+    # {address}  -> it will insert Unix socket, Windows named pipe or network address
     cmd: list[str] = [
         "vivado",
         "-nojournal",
@@ -95,10 +92,7 @@ def main() -> None:
         "-source",
         "{tcl}",
         "-tclargs",
-        "{receiver}",
-        "{rx}",
-        "{sender}",
-        "{tx}",
+        "{address}",
     ]
 
     with PyTCL(*cmd) as vivado:
@@ -117,31 +111,28 @@ if __name__ == "__main__":
 ```mermaid
 stateDiagram-v2
     direction LR
-    PyTCL --> rx.sock: send()
-    rx.sock --> receiver.py: string
+    PyTCL --> connection: send()
+    connection --> execute.py: string
     state tool {
-        receiver.py --> execute.tcl: stdin
-        execute.tcl --> sender.py: stdout
+        execute.py --> execute.tcl: stdin
+        execute.tcl --> execute.py: stdout
     }
-    sender.py --> tx.sock: NDJSON
-    tx.sock --> PyTCL: recv()
+    execute.py --> connection: NDJSON
+    connection --> PyTCL: recv()
 ```
 
-- `PyTCL` will start new receiver listened on Unix domain socket `/tmp/pytcl-XXXX/tx.sock` for any
-  incoming [NDJSON] messages `{"result": "<tcl-result>", "status": <tcl-status>}` from `execute.tcl` script file
-- `PyTCL` will call command line tool (by default `tclsh`) with `execute.tcl` script file and
-  arguments `receiver.py /tmp/pytcl-XXXX/rx.sock sender.py /tmp/pytcl-XXXX/tx.sock`
-- Started `execute.tcl` will create own listener with Unix domain socket `/tmp/pytcl-XXXX/rx.sock` to
-  receive incoming TCL expressions from `PyTCL`
-- `PyTCL` will start new client and connect to Unix domain socket `/tmp/pytcl-XXXX/rx.sock` to send
-  TCL expressions with arguments to be evaluated by `execute.tcl` script file
+- `PyTCL` will run tool with `execute.tcl <address>` arguments in separate process
+- `execute.tcl` invoked by tool will invoke `execute.py`
+- `execute.py` will start new connection listener on provided `<address>`
+- `PyTCL` will try connect to `<address>` as client
 - `PyTCL` will transform any Python method call `<object>.<name>(*args)` to TCL expression `<name> {*}${args}`
-- `PyTCL` will send TCL expression to `execute.tcl` using Unix domain socket `/tmp/pytcl-XXXX/rx.sock`
-- `execute.tcl` will receive TCL expressions from Unix domain socket `/tmp/pytcl-XXXX/rx.sock`
-- Received TCL expression is evaluated by TCL `eval` within TCL `catch`
-- TCL result and status from evaluated TCL expression will be packed into [NDJSON] message
-  `{"result": "<tcl-result>", "status": <tcl-status>}`
-- Packed [NDJSON] message with TCL result and status will be send back to `PyTCL`
+- `PyTCL` will send TCL expression as string to `execute.py` via `<address>`
+- `execute.py` will print received TCL expression to standard output `stdout`
+- `execute.tcl` will capture received TCL expression from `execute.py` using standard input `stdin`
+- `execute.tcl` will evaluate received TCL expression
+- `execute.tcl` will print result of evaluated TCL expression back to `execute.py` using standard output `stdout`
+  in form of [NDJSON] `{"result": "<tcl-result>", "status": <tcl-status>}`
+- `execute.py` will capture above result using standard input `stdin` and send it back to `PyTCL`
 - `PyTCL` will return received [NDJSON] message as `pytcl.TCLValue`
 - `PyTCL` will raise a Python exception `pytcl.TCLError` if received TCL status was non-zero
 
